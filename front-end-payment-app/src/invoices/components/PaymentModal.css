@@ -1,0 +1,219 @@
+/* modal overlay */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 8px;
+    width: 440px;
+    /* slightly wider to accommodate icons and horizontal form groups */
+    max-width: 90%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-content h2 {
+    margin-top: 0;
+    font-size: 1.25rem;
+    text-align: center;
+}
+
+.payment-form label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.payment-form input,
+.payment-form select {
+    width: 100%;
+    padding: 0.75rem 0.8rem;
+    margin-top: 0.25rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    box-sizing: border-box;
+}
+
+.card-group {
+    background: #ffffff;
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+.country-group {
+    display: flex;
+    flex-direction: row;
+    gap: 0.75rem;
+}
+
+.country-group label {
+    flex: 1;
+}
+
+.country-group label {
+    width: 100%;
+}
+
+/* wrapper for inputs that need an icon inside */
+.cvc-wrapper {
+    position: relative;
+}
+
+.cvc-wrapper input {
+    padding-right: 2.5rem;
+    /* space for icon */
+}
+
+.cvc-icon {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.85rem;
+    color: #888;
+    cursor: help;
+}
+
+.card-input-wrapper input {
+    padding-right: 3rem;
+}
+
+
+.card-input-wrapper {
+    position: relative;
+}
+
+.card-logos {
+    position: absolute;
+    top: 50%;
+    right: 0.5rem;
+    transform: translateY(-50%);
+    display: flex;
+    gap: 0.25rem;
+}
+
+.card-logos .card-logo {
+    width: 28px;
+    height: 18px;
+    display: inline-block;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.card-logos .visa {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png");
+}
+
+.card-logos .mastercard {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg");
+}
+
+.card-logos .amex {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg");
+}
+
+.card-logos .discover {
+    background-image: url("https://upload.wikimedia.org/wikipedia/commons/5/5a/Discover_Card_logo.svg");
+}
+
+.card-row {
+    display: flex;
+    gap: 1rem;
+    border-top: 1px solid #ddd;
+    padding-top: 0.5rem;
+}
+
+.card-row label {
+    flex: 1;
+}
+
+.pay-modal-button {
+    width: 100%;
+    background-color: #1a254f;
+    color: white;
+    border: none;
+    padding: 0.85rem 0;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1.05rem;
+    margin-top: 0.85rem;
+    font-weight: 600;
+}
+
+.pay-modal-button:hover {
+    background-color: #131a3c;
+}
+
+.payment-form input:focus,
+.payment-form select:focus {
+    outline: none;
+    border-color: #4b29db;
+    box-shadow: 0 0 0 2px rgba(75, 41, 219, 0.2);
+}
+
+.disclaimer {
+    font-size: 0.65rem;
+    opacity: 0.7;
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+/* success screen styles */
+.success-container {
+    text-align: center;
+    padding: 1rem;
+}
+
+.success-icon {
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    margin: 0 auto 0.5rem;
+    font-size: 2.5rem;
+    background-color: #e6f9ec;
+    color: #4caf50;
+    border-radius: 50%;
+}
+
+.success-total {
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin: 0.5rem 0 1rem;
+}
+
+.success-table {
+    width: 100%;
+    margin-top: 1rem;
+    border-collapse: collapse;
+    text-align: left;
+}
+
+.success-table td {
+    padding: 0.5rem 0;
+}
+
+.success-table .label-cell {
+    font-weight: 600;
+}
+
+.success-table tr:not(:last-child) {
+    border-bottom: 1px dashed #ccc;
+}
+
+.success-table .value-cell {
+    text-align: right;
+    font-weight: 600;
+}
