@@ -33,6 +33,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, amount, fee 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (loading) {
+            return;
+        }
+
         setError(null);
         setLoading(true);
 
