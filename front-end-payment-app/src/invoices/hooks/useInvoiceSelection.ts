@@ -20,6 +20,11 @@ export function useInvoiceSelection(invoices: Invoice[]) {
         [selectedInvoices]
     );
 
+    const fixedTotalAmount = useMemo(
+        () => invoices.reduce((sum, inv) => sum + inv.amount, 0),
+        [invoices]
+    );
+
     const fee = useMemo(() => (totalAmount ? 5.0 : 0), [totalAmount]);
     const totalToPay = useMemo(() => totalAmount + fee, [totalAmount, fee]);
 
@@ -32,6 +37,7 @@ export function useInvoiceSelection(invoices: Invoice[]) {
         toggleSelection,
         selectedInvoices,
         totalAmount,
+        fixedTotalAmount,
         fee,
         totalToPay,
         clearSelection,

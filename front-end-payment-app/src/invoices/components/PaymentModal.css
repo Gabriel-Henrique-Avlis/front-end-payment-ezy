@@ -11,7 +11,7 @@
 
 .modal-content {
     background: white;
-    padding: 2.5rem;
+    padding: 1.5rem;
     border-radius: 8px;
     width: 440px;
     /* slightly wider to accommodate icons and horizontal form groups */
@@ -21,13 +21,14 @@
 
 .modal-content h2 {
     margin-top: 0;
+    margin-bottom: 1rem;
     font-size: 1.25rem;
     text-align: center;
 }
 
 .payment-form label {
     display: block;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     font-size: 0.875rem;
 }
 

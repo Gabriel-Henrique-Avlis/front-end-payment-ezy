@@ -1,17 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import type { Invoice } from '../types/Invoice';
+import type { InvoicesTableProps } from '../types/InvoicesTable';
+import type { InvoiceSortKey } from '../types/InvoiceSortKey';
 import InvoiceRow from './InvoiceRow';
 
-type SortKey = 'id' | 'vendor' | 'issueDate' | 'dueDate' | 'amount' | 'priority';
-
-interface Props {
-    invoices: Invoice[];
-    selectedIds: string[];
-    onToggle: (id: string) => void;
-}
-
-export const InvoicesTable: React.FC<Props> = ({ invoices, selectedIds, onToggle }) => {
-    const [sortKey, setSortKey] = useState<SortKey>('id');
+export const InvoicesTable: React.FC<InvoicesTableProps> = ({ invoices, selectedIds, onToggle }) => {
+    const [sortKey, setSortKey] = useState<InvoiceSortKey>('id');
     const [asc, setAsc] = useState(true);
 
     const sorted = useMemo(() => {
@@ -26,7 +19,7 @@ export const InvoicesTable: React.FC<Props> = ({ invoices, selectedIds, onToggle
         });
     }, [invoices, sortKey, asc]);
 
-    const handleHeaderClick = (key: SortKey) => {
+    const handleHeaderClick = (key: InvoiceSortKey) => {
         if (key === sortKey) {
             setAsc(!asc);
         } else {
@@ -35,7 +28,7 @@ export const InvoicesTable: React.FC<Props> = ({ invoices, selectedIds, onToggle
         }
     };
 
-    const arrow = (key: SortKey) => {
+    const arrow = (key: InvoiceSortKey) => {
         if (key !== sortKey) return '';
         return asc ? '↑' : '↓';
     };

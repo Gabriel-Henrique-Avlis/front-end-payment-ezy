@@ -33,10 +33,6 @@ export const Summary: React.FC<Props> = ({ selectedInvoices, fee, totalToPay, on
                         <span>Fee</span>
                         <span>{formatAmount(fee)}</span>
                     </div>
-                    <div className="summary-total">
-                        <span>Total</span>
-                        <span>{formatAmount(totalToPay)}</span>
-                    </div>
                     <button className="pay-button" onClick={onPay}>
                         Pay {formatAmount(totalToPay)}
                     </button>

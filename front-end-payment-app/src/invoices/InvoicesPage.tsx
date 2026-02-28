@@ -14,6 +14,7 @@ export const InvoicesPage: React.FC = () => {
         selectedIds,
         toggleSelection,
         selectedInvoices,
+        fixedTotalAmount,
         fee,
         totalToPay,
         clearSelection,
@@ -40,7 +41,7 @@ export const InvoicesPage: React.FC = () => {
                     <div className="total-card">
                         <div className="total-label">Total amount to pay</div>
                         <div className="total-value">
-                            {new Intl.NumberFormat(undefined, { style: 'currency', currency: selectedInvoices[0]?.currency || 'USD' }).format(totalToPay)}
+                            {new Intl.NumberFormat(undefined, { style: 'currency', currency: invoices[0]?.currency || 'USD' }).format(fixedTotalAmount)}
                         </div>
                         <div className="total-date">{new Date(lastUpdated).toLocaleDateString()}</div>
                     </div>
