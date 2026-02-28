@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PaymentModal.css';
+import { createPayment, generateIdempotencyKey } from '../../services/paymentService';
 
 interface PaymentResult {
     refNumber: string;
@@ -26,6 +27,8 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
     const [name, setName] = useState('');
     const [country, setCountry] = useState('United States');
     const [zip, setZip] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!isOpen) {
@@ -38,29 +41,68 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
             setCountry('United States');
             setZip('');
             setPaymentResult(null);
+            setError(null);
+            setLoading(false);
         }
     }, [isOpen]);
 
     const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // simulate payment processing
-        const now = new Date();
-        const result: PaymentResult = {
-            refNumber: Math.floor(100000000000 + Math.random() * 900000000000).toString(),
-            paymentTime: now.toLocaleString(),
-            amount,
-            fee: fee || 0,
-        };
+        setError(null);
+        setLoading(true);
 
-        if (onSubmit) {
-            onSubmit({ email, cardNumber, expiry, cvc, name, country, zip, amount });
-        }
+        try {
+            // Split full name into first and last
+            const nameParts = name.trim().split(/\s+/);
+            const firstName = nameParts[0] || '';
+            const lastName = nameParts.slice(1).join(' ') || '';
 
-        setPaymentResult(result);
-        if (onSuccess) {
-            onSuccess(result);
+            // Generate idempotency key to prevent duplicate payments
+            const idempotencyKey = generateIdempotencyKey();
+
+            // Call payment API
+            const response = await createPayment(
+                {
+                    firstName,
+                    lastName,
+                    cardNumber: cardNumber.replace(/\s+/g, ''), // remove spaces
+                    expiry,
+                    cvv: cvc, // API expects "cvv" field
+                },
+                idempotencyKey
+            );
+
+            // Build result from API response
+            const result: PaymentResult = {
+                refNumber: response.data.refNumber,
+                paymentTime: response.data.paymentTime,
+                amount,
+                fee: fee || 0,
+            };
+
+            if (onSubmit) {
+                onSubmit({ email, cardNumber, expiry, cvc, name, country, zip, amount });
+            }
+
+            setPaymentResult(result);
+            if (onSuccess) {
+                onSuccess(result);
+            }
+        } catch (err: any) {
+            console.error('Payment failed:', err);
+
+            // Handle different error scenarios
+            if (err.response?.status === 409) {
+                setError('Duplicate payment detected. This transaction has already been processed.');
+            } else if (err.response?.data?.message) {
+                setError(err.response.data.message);
+            } else {
+                setError('Payment failed. Please check your card details and try again.');
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -184,8 +226,21 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                                 </label>
                             </div>
 
-                            <button type="submit" className="pay-modal-button">
-                                Pay {new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount)}
+                            {error && (
+                                <div className="error-message" style={{
+                                    color: '#d32f2f',
+                                    backgroundColor: '#ffebee',
+                                    padding: '12px',
+                                    borderRadius: '4px',
+                                    marginBottom: '16px',
+                                    fontSize: '14px'
+                                }}>
+                                    {error}
+                                </div>
+                            )}
+
+                            <button type="submit" className="pay-modal-button" disabled={loading}>
+                                {loading ? 'Processing...' : `Pay ${new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount)}`}
                             </button>
                         </form>
                         <p className="disclaimer">By clicking Pay, you agree to the Link Terms and Privacy Policy.</p>

@@ -11,6 +11,24 @@ Currently, two official plugins are available:
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
+## API integration (axios)
+
+This project ships with [`axios`](https://axios-http.com/) already installed (see `package.json`).
+A shared instance lives in `src/services/api.ts`, which reads the
+base URL from the `VITE_API_BASE_URL` environment variable.
+You can set that variable in a `.env` file at the project root or
+pass it on the command line before running `pnpm dev`/`npm run dev`.
+
+```env
+VITE_API_BASE_URL=http://localhost:4000
+```
+
+Invoice‑specific helpers are located in `src/invoices/services/invoiceService.ts`.
+They return typed responses and are currently used by `InvoicesPage`.
+Feel free to extend them as your backend grows (create/update/delete, etc.).
+
+---
+
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:

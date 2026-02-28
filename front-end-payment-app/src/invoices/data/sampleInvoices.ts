@@ -1,6 +1,9 @@
 import type { Invoice } from '../types/Invoice';
 
-// mimic API response shape
+// This file provides a hard‑coded response shape used by the UI while
+// the backend is still under development.  `InvoicesPage` now attempts
+// to load real data via `invoiceService` and falls back to this object
+// on initial render (and if the request fails).
 export const sampleData = {
     invoices: [
         {
