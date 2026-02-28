@@ -1,9 +1,8 @@
 import type { Invoice } from '../types/Invoice';
 
-// This file provides a hard‑coded response shape used by the UI while
-// the backend is still under development.  `InvoicesPage` now attempts
-// to load real data via `invoiceService` and falls back to this object
-// on initial render (and if the request fails).
+// This file provides the mocked invoices required by the frontend.
+// The current backend contract exposes only POST /payments, so invoices
+// intentionally stay local and are not loaded from an API.
 export const sampleData = {
     invoices: [
         {

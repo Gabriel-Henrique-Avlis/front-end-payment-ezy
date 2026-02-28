@@ -1,52 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import './PaymentModal.css';
 import { createPayment, generateIdempotencyKey } from '../../services/paymentService';
+import { getApiErrorMessage } from '../../services/errorHandler';
+import type { PaymentResult, PaymentModalProps, PaymentFormData } from '../types/PaymentModal';
+import { initialPaymentFormData } from '../types/PaymentModal';
+import {
+    splitCardholderName,
+    sanitizeCardNumber,
+    formatCurrency,
+    buildPaymentResult,
+    toSubmitPayload,
+} from '../utils/paymentModal';
 
-interface PaymentResult {
-    refNumber: string;
-    paymentTime: string;
-    amount: number;
-    fee: number;
-}
-
-interface Props {
-    isOpen: boolean;
-    amount: number;
-    fee?: number;
-    currency?: string;
-    onClose: () => void;
-    onSubmit?: (data: any) => void;
-    onSuccess?: (result: PaymentResult) => void;
-}
-
-export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currency = 'USD', onClose, onSubmit, onSuccess }) => {
-    const [email, setEmail] = useState('');
-    const [cardNumber, setCardNumber] = useState('');
-    const [expiry, setExpiry] = useState('');
-    const [cvc, setCvc] = useState('');
-    const [name, setName] = useState('');
-    const [country, setCountry] = useState('United States');
-    const [zip, setZip] = useState('');
+export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, amount, fee = 0, currency = 'USD', onClose, onSubmit, onSuccess }) => {
+    const [formData, setFormData] = useState<PaymentFormData>(initialPaymentFormData);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
+
+    const updateField = <K extends keyof PaymentFormData>(field: K, value: PaymentFormData[K]) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
 
     useEffect(() => {
         if (!isOpen) {
-            // clear fields when closed
-            setEmail('');
-            setCardNumber('');
-            setExpiry('');
-            setCvc('');
-            setName('');
-            setCountry('United States');
-            setZip('');
+            setFormData(initialPaymentFormData);
             setPaymentResult(null);
             setError(null);
             setLoading(false);
         }
     }, [isOpen]);
-
-    const [paymentResult, setPaymentResult] = useState<PaymentResult | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -54,53 +37,33 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
         setLoading(true);
 
         try {
-            // Split full name into first and last
-            const nameParts = name.trim().split(/\s+/);
-            const firstName = nameParts[0] || '';
-            const lastName = nameParts.slice(1).join(' ') || '';
-
-            // Generate idempotency key to prevent duplicate payments
+            const { firstName, lastName } = splitCardholderName(formData.name);
             const idempotencyKey = generateIdempotencyKey();
 
-            // Call payment API
             const response = await createPayment(
                 {
                     firstName,
                     lastName,
-                    cardNumber: cardNumber.replace(/\s+/g, ''), // remove spaces
-                    expiry,
-                    cvv: cvc, // API expects "cvv" field
+                    cardNumber: sanitizeCardNumber(formData.cardNumber),
+                    expiry: formData.expiry,
+                    cvv: formData.cvc,
                 },
                 idempotencyKey
             );
 
-            // Build result from API response
-            const result: PaymentResult = {
-                refNumber: response.data.refNumber,
-                paymentTime: response.data.paymentTime,
-                amount,
-                fee: fee || 0,
-            };
+            const result: PaymentResult = buildPaymentResult(response.data, amount, fee || 0);
 
             if (onSubmit) {
-                onSubmit({ email, cardNumber, expiry, cvc, name, country, zip, amount });
+                onSubmit(toSubmitPayload(formData, amount));
             }
 
             setPaymentResult(result);
             if (onSuccess) {
                 onSuccess(result);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Payment failed:', err);
-
-            // Handle different error scenarios
-            if (err.response?.status === 409) {
-                setError('Duplicate payment detected. This transaction has already been processed.');
-            } else if (err.response?.data?.message) {
-                setError(err.response.data.message);
-            } else {
-                setError('Payment failed. Please check your card details and try again.');
-            }
+            setError(getApiErrorMessage(err));
         } finally {
             setLoading(false);
         }
@@ -116,7 +79,7 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                         <div className="success-icon">✔️</div>
                         <h2>Payment Success!</h2>
                         <div className="success-total">
-                            {new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(paymentResult.amount)}
+                            {formatCurrency(paymentResult.amount, currency)}
                         </div>
                         <table className="success-table">
                             <tbody>
@@ -130,11 +93,11 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                                 </tr>
                                 <tr>
                                     <td className="label-cell">Amount</td>
-                                    <td className="value-cell">{new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(paymentResult.amount)}</td>
+                                    <td className="value-cell">{formatCurrency(paymentResult.amount, currency)}</td>
                                 </tr>
                                 <tr>
                                     <td className="label-cell">Fee</td>
-                                    <td className="value-cell">{new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(paymentResult.fee)}</td>
+                                    <td className="value-cell">{formatCurrency(paymentResult.fee, currency)}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -146,8 +109,8 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                             <label className="full-width">Email
                                 <input
                                     type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={formData.email}
+                                    onChange={(e) => updateField('email', e.target.value)}
                                     required
                                 />
                             </label>
@@ -157,8 +120,8 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                                     <div className="card-input-wrapper">
                                         <input
                                             type="text"
-                                            value={cardNumber}
-                                            onChange={(e) => setCardNumber(e.target.value)}
+                                            value={formData.cardNumber}
+                                            onChange={(e) => updateField('cardNumber', e.target.value)}
                                             placeholder="1234 1234 1234 1234"
                                             required
                                         />
@@ -176,8 +139,8 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                                     <label>MM / YY
                                         <input
                                             type="text"
-                                            value={expiry}
-                                            onChange={(e) => setExpiry(e.target.value)}
+                                            value={formData.expiry}
+                                            onChange={(e) => updateField('expiry', e.target.value)}
                                             placeholder="MM / YY"
                                             required
                                         />
@@ -185,8 +148,8 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                                     <label className="cvc-wrapper">CVC
                                         <input
                                             type="text"
-                                            value={cvc}
-                                            onChange={(e) => setCvc(e.target.value)}
+                                            value={formData.cvc}
+                                            onChange={(e) => updateField('cvc', e.target.value)}
                                             placeholder="CVC"
                                             required
                                         />
@@ -198,8 +161,8 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                             <label className="full-width">Cardholder name
                                 <input
                                     type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
+                                    value={formData.name}
+                                    onChange={(e) => updateField('name', e.target.value)}
                                     placeholder="Full name on card"
                                     required
                                 />
@@ -207,7 +170,7 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
 
                             <div className="country-group">
                                 <label>Country or region
-                                    <select value={country} onChange={(e) => setCountry(e.target.value)}>
+                                    <select value={formData.country} onChange={(e) => updateField('country', e.target.value)}>
                                         <option>United States</option>
                                         <option>Canada</option>
                                         <option>United Kingdom</option>
@@ -219,28 +182,21 @@ export const PaymentModal: React.FC<Props> = ({ isOpen, amount, fee = 0, currenc
                                 <label>ZIP
                                     <input
                                         type="text"
-                                        value={zip}
-                                        onChange={(e) => setZip(e.target.value)}
+                                        value={formData.zip}
+                                        onChange={(e) => updateField('zip', e.target.value)}
                                         required
                                     />
                                 </label>
                             </div>
 
                             {error && (
-                                <div className="error-message" style={{
-                                    color: '#d32f2f',
-                                    backgroundColor: '#ffebee',
-                                    padding: '12px',
-                                    borderRadius: '4px',
-                                    marginBottom: '16px',
-                                    fontSize: '14px'
-                                }}>
+                                <div className="error-message">
                                     {error}
                                 </div>
                             )}
 
                             <button type="submit" className="pay-modal-button" disabled={loading}>
-                                {loading ? 'Processing...' : `Pay ${new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount)}`}
+                                {loading ? 'Processing...' : `Pay ${formatCurrency(amount, currency)}`}
                             </button>
                         </form>
                         <p className="disclaimer">By clicking Pay, you agree to the Link Terms and Privacy Policy.</p>

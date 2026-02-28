@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './InvoicesPage.css';
 
 import { sampleData } from './data/sampleInvoices';
@@ -7,29 +7,8 @@ import InvoicesTable from './components/InvoicesTable';
 import Summary from './components/Summary';
 import { PaymentModal } from './components/PaymentModal';
 
-// service helpers that wrap the shared axios instance
-import * as invoiceService from './services/invoiceService';
-import type { Invoice } from './types/Invoice';
-
 export const InvoicesPage: React.FC = () => {
-    // maintain local state so we can swap out the sample data once we
-    // successfully load from the backend.
-    const [invoices, setInvoices] = useState<Invoice[]>(sampleData.invoices);
-    const [lastUpdated, setLastUpdated] = useState(sampleData.lastUpdated);
-
-    useEffect(() => {
-        invoiceService
-            .getInvoices()
-            .then((res) => {
-                if (res.data) {
-                    setInvoices(res.data.invoices || []);
-                    setLastUpdated(res.data.lastUpdated || new Date().toISOString());
-                }
-            })
-            .catch((err) => {
-                console.error('Failed to load invoices', err);
-            });
-    }, []);
+    const { invoices, lastUpdated } = sampleData;
 
     const {
         selectedIds,

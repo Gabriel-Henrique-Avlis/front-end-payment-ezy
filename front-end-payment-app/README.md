@@ -23,9 +23,9 @@ pass it on the command line before running `pnpm dev`/`npm run dev`.
 VITE_API_BASE_URL=http://localhost:4000
 ```
 
-Invoice‑specific helpers are located in `src/invoices/services/invoiceService.ts`.
-They return typed responses and are currently used by `InvoicesPage`.
-Feel free to extend them as your backend grows (create/update/delete, etc.).
+Payment requests are handled in `src/services/paymentService.ts` via
+`POST /payments` with the `Idempotency-Key` header.
+Invoices stay mocked on the frontend as required by the prototype scope.
 
 ---
 
