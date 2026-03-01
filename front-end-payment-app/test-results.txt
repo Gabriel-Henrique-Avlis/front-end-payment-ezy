@@ -1,0 +1,4 @@
+﻿
+> front-end-payment-app@0.0.0 test C:\Desenvolvimento\REACT\front-end-payment-ezy\front-end-payment-app
+> vitest "--run"
+
