@@ -3,7 +3,11 @@ import { createPayment, generateIdempotencyKey } from './paymentService';
 import api from './api';
 
 // Mock the api module
-vi.mock('../api');
+vi.mock('./api', () => ({
+    default: {
+        post: vi.fn(),
+    },
+}));
 
 describe('PaymentService', () => {
     beforeEach(() => {
@@ -53,7 +57,7 @@ describe('PaymentService', () => {
                 },
             };
 
-            vi.mocked(api.post).mockResolvedValue(mockResponse);
+            (api.post as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
             await createPayment(mockPaymentData, mockIdempotencyKey);
 
@@ -80,7 +84,7 @@ describe('PaymentService', () => {
                 },
             };
 
-            vi.mocked(api.post).mockResolvedValue(mockResponse);
+            (api.post as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
             const result = await createPayment(mockPaymentData, mockIdempotencyKey);
 
@@ -90,7 +94,7 @@ describe('PaymentService', () => {
 
         it('should propagate API errors', async () => {
             const mockError = new Error('Payment failed');
-            vi.mocked(api.post).mockRejectedValue(mockError);
+            (api.post as ReturnType<typeof vi.fn>).mockRejectedValue(mockError);
 
             await expect(
                 createPayment(mockPaymentData, mockIdempotencyKey)
@@ -105,7 +109,7 @@ describe('PaymentService', () => {
                 },
             };
 
-            vi.mocked(api.post).mockRejectedValue(conflictError);
+            (api.post as ReturnType<typeof vi.fn>).mockRejectedValue(conflictError);
 
             await expect(
                 createPayment(mockPaymentData, mockIdempotencyKey)
@@ -114,11 +118,11 @@ describe('PaymentService', () => {
 
         it('should validate that cardNumber is included in request', async () => {
             const mockResponse = { data: { id: '1', refNumber: 'REF123' } };
-            vi.mocked(api.post).mockResolvedValue(mockResponse);
+            (api.post as ReturnType<typeof vi.fn>).mockResolvedValue(mockResponse);
 
             await createPayment(mockPaymentData, mockIdempotencyKey);
 
-            const callArgs = vi.mocked(api.post).mock.calls[0];
+            const callArgs = (api.post as ReturnType<typeof vi.fn>).mock.calls[0];
             expect(callArgs[1]).toHaveProperty('cardNumber', '4111111111111111');
         });
     });

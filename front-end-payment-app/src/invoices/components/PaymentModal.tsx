@@ -4,8 +4,13 @@ import { createPayment, generateIdempotencyKey } from '../../services/paymentSer
 import { getApiErrorMessage } from '../../services/errorHandler';
 import type { PaymentResult, PaymentModalProps, PaymentFormData } from '../types/PaymentModal';
 import { initialPaymentFormData } from '../types/PaymentModal';
+import { VisaLogo } from './VisaLogo';
+import { MastercardLogo } from './MastercardLogo';
+import { AmexLogo } from './AmexLogo';
+import { DiscoverLogo } from './DiscoverLogo';
 import {
     splitCardholderName,
+    validateCardholderName,
     sanitizeCardNumber,
     formatCurrency,
     buildPaymentResult,
@@ -39,6 +44,12 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, amount, fee 
         e.preventDefault();
 
         if (loading) {
+            return;
+        }
+
+        // Validate cardholder name
+        if (!validateCardholderName(formData.name)) {
+            setError('Cardholder name must include both first name and surname.');
             return;
         }
 
@@ -137,11 +148,11 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, amount, fee 
                                             required
                                         />
                                         <div className="card-logos">
-                                            {/* card brand icons via CSS */}
-                                            <span className="card-logo visa" />
-                                            <span className="card-logo mastercard" />
-                                            <span className="card-logo amex" />
-                                            <span className="card-logo discover" />
+                                            {/* card brand icons - embedded SVG components */}
+                                            <VisaLogo />
+                                            <MastercardLogo />
+                                            <AmexLogo />
+                                            <DiscoverLogo />
                                         </div>
                                     </div>
                                 </label>

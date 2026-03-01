@@ -114,20 +114,10 @@
     background-repeat: no-repeat;
 }
 
-.card-logos .visa {
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/4/41/Visa_Logo.png");
-}
-
-.card-logos .mastercard {
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg");
-}
-
-.card-logos .amex {
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg");
-}
-
-.card-logos .discover {
-    background-image: url("https://upload.wikimedia.org/wikipedia/commons/5/5a/Discover_Card_logo.svg");
+.card-logos svg {
+    width: 28px;
+    height: 18px;
+    margin-right: 8px;
 }
 
 .card-row {
